@@ -1,0 +1,20 @@
+# Node modules
+/node_modules
+
+# Logs
+*.log
+
+# Build output
+/dist
+
+# Environment variables
+/src/env
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS-specific files
+.DS_Store  # macOS
+Thumbs.db  # Windows
+
