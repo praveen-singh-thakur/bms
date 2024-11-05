@@ -42,7 +42,7 @@ class UserAuthService extends AuthHelpers {
             return await userFactory.register(data, isTenant);
 
         } catch (error) {
-            throw new Error("Internal server error", error);
+            throw new Error(error.message);
         }
     }
 
@@ -55,7 +55,7 @@ class UserAuthService extends AuthHelpers {
             return await userFactory.login({ email, password }, isTenant);
 
         } catch (error) {
-            throw new Error("Internal server error", error);
+            throw new Error(error.message);
         }
 
     }

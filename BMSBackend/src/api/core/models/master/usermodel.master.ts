@@ -8,7 +8,6 @@ class UserModel {
 
     constructor(db: Knex) {
         this.db = db;
-
     }
 
     public async findByEmail(email: string) {
@@ -25,7 +24,7 @@ class UserModel {
             const [insertedUserId] = await this.db('super_admin').insert(user);
             return await this.db('super_admin')
                 .where({ id: insertedUserId })
-                .select('uuid', 'first_name', 'last_name', 'email', 'profile_url')
+                .select('id', 'uuid', 'first_name', 'last_name', 'email', 'profile_url')
                 .first();
 
         } catch (error) {

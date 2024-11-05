@@ -4,6 +4,7 @@ import { Server } from '@config/server.config';
 import { Application } from '@config/app.config';
 import { DbConfiguration } from '@config/knex.config';
 import Database from './../db/connection';
+import '@config/redis.config';
 
 let application: typeof Application;
 let server: unknown;

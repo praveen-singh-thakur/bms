@@ -2,12 +2,6 @@ import { IUser } from '@dbinterfaces';
 import * as Joi from 'joi';
 
 const register: Joi.ObjectSchema<IUser> = Joi.object({ // Use 'Joi.object'
-    uuid: Joi.string()
-        .guid({ version: ['uuidv1', 'uuidv4', 'uuidv5'] })
-        .messages({
-            'string.guid': 'UUID must be a valid version 4 or 5 UUID.',
-            'any.required': 'UUID is required.',
-        }),
     first_name: Joi.string()
         .min(3)
         .max(50)

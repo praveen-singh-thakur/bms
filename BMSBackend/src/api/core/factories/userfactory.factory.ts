@@ -4,21 +4,25 @@ import AuthHelpers from '@utils/authHelpers.utils';
 import { Knex } from 'knex';
 import Helpers from '@utils/helpers.utils';
 import * as bcrypt from 'bcrypt';
-
+import RefreshTokenModel from './../models/refresh.model';
+import client from '@config/redis.config';
 
 export class UserFactory extends AuthHelpers {
 
     private userModel: UserModel;
+    private refreshTokenModel: RefreshTokenModel;
 
     constructor(db: Knex) {
         super();
         this.userModel = new UserModel(db);
+        this.refreshTokenModel = new RefreshTokenModel(db);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async register(userDetails: IUser, isTenant: boolean) {
         try {
             const model = this.userModel;
+            const tokenModel = this.refreshTokenModel;
             const existingUser = await model.findByEmail(userDetails.email);
 
             if (existingUser) {
@@ -30,6 +34,7 @@ export class UserFactory extends AuthHelpers {
             const data = {
                 ...userDetails,
                 password: hashedPassword,
+                uuid: this.generateUUID()
             };
 
             const createuser = await model.createUser(data);
@@ -47,6 +52,10 @@ export class UserFactory extends AuthHelpers {
             const accessToken = this.generateToken(payload, accessTokenExpiry);
             const refreshToken = this.generateToken(payload, refreshTokenExpiry);
 
+            const savedRefreshToken = await tokenModel.insertToken(this.generateUUID(), refreshToken, createuser.id, Helpers.convertSecondsToDate(refreshTokenExpiry));
+
+            await client.set("SuperAdminRefreshTokenId", savedRefreshToken.uuid);
+
             return {
                 userId: createuser.uuid,
                 firstName: createuser.first_name,
@@ -63,7 +72,7 @@ export class UserFactory extends AuthHelpers {
         } catch (err) {
             console.log(err);
             if (err instanceof Error)
-                throw new Error("Internal server error", err);
+                throw new Error(err.message);
         }
 
     }
@@ -72,6 +81,8 @@ export class UserFactory extends AuthHelpers {
     public async login(userDetails: { email: string; password: string }, isTenant: boolean) {
         try {
             const model = this.userModel;
+            const tokenModel = this.refreshTokenModel;
+
             const existingUser = await model.findByEmail(userDetails.email);
 
             if (!existingUser) {
@@ -90,6 +101,10 @@ export class UserFactory extends AuthHelpers {
             const accessToken = this.generateToken(payload, accessTokenExpiry);
             const refreshToken = this.generateToken(payload, refreshTokenExpiry);
 
+            const savedRefreshToken = await tokenModel.insertToken(this.generateUUID(), refreshToken, existingUser.id, Helpers.convertSecondsToDate(refreshTokenExpiry));
+
+            await client.set("SuperAdminRefreshTokenId", savedRefreshToken.uuid);
+
             return {
                 userId: existingUser.uuid,
                 firstName: existingUser.first_name,
@@ -107,7 +122,7 @@ export class UserFactory extends AuthHelpers {
         } catch (err) {
             console.log(err);
             if (err instanceof Error)
-                throw new Error("Internal server error", err);
+                throw new Error(err.message);
         }
     };
 
@@ -138,7 +153,6 @@ export class UserFactory extends AuthHelpers {
         } catch (error) {
             // Throw error if user is not found or if the token is invalid
             throw new Error(`Internal server error: ${error.message}`);
-
         }
     }
 

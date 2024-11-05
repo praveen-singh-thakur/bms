@@ -4,6 +4,8 @@ import { Register } from "@validations";
 import * as  Joi from 'joi';
 import Helpers from '@utils/helpers.utils';
 import * as jwt from 'jsonwebtoken';
+import client from "@config/redis.config";
+import RefreshTokenModel from './../models/refresh.model';
 
 interface AuthenticatedRequest extends Request {
     user?: { id: string; email: string; } | jwt.JwtPayload;
@@ -72,10 +74,12 @@ class Validator {
     }
 
 
-    checkingUserAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-
-        const token = req.cookies.refreshtoken;  // Get token from cookies
-
+    async checkingUserAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const db = (req as any).knex;
+        const tokenId = await client.get("SuperAdminRefreshTokenId");
+        const data = await new RefreshTokenModel(db).findByUUID(tokenId);
+        const token = data.token;
         if (!token) {
             res.status(403).json(Helpers.responseHandler(403, "You have been Logged Out, SignIn First", undefined, 'Token is required'));
             return;

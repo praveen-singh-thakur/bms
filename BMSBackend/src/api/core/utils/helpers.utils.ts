@@ -1,5 +1,6 @@
 
 import { IResponseHandler } from "@interfaces";
+import { format } from "date-fns";
 
 class Helpers {
 
@@ -49,6 +50,12 @@ class Helpers {
             default:
                 throw new Error('Invalid unit. Use "minutes", "hours", "days", "weeks", or "months".');
         }
+    }
+
+    static convertSecondsToDate(seconds: number) {
+        const expirationTimestamp = Math.floor(Date.now() / 1000) + seconds;
+        const date = new Date(expirationTimestamp * 1000);
+        return format(date, 'yyyy-MM-dd HH:mm:ss');
     }
 
 }
