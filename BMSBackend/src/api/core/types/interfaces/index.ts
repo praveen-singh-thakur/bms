@@ -1,3 +1,4 @@
 import { IRoute } from "./route.interfaces";
 import { IResponseHandler } from "./responsehandler.interfaces";
-export { IRoute, IResponseHandler }
+import { IToken } from './Token.interfaces';
+export { IRoute, IResponseHandler, IToken };

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Helpers from "@utils/helpers.utils";
-import { UserAuthService } from "@services/auth.services";
+import { UserAuthService } from "@services/master";
 
 class AuthController {
     private static instance: AuthController;
@@ -43,6 +43,15 @@ class AuthController {
             res.json(Helpers.responseHandler(500, undefined, undefined, error.message));
         }
 
+    }
+
+    public async refreshAccessToken(req: Request, res: Response) {
+        try {
+            const result = await UserAuthService.refreshAccessToken(req);
+            res.json(Helpers.responseHandler(200, "New Access Token and Refresh Token has been generated.", result));
+        } catch (error) {
+            res.json(Helpers.responseHandler(500, undefined, undefined, error.message));
+        }
     }
 
 }

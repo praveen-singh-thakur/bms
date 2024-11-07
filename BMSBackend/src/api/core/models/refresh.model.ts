@@ -1,30 +1,21 @@
 
 import { Knex } from 'knex';
-class RefreshTokenModel {
+import { Model } from '@models/base.model';
+import { IRefreshToken } from '@dbinterfaces';
+
+class RefreshTokenModel extends Model<IRefreshToken> {
 
     private db: Knex;
 
     constructor(db: Knex) {
+        super(db, "refresh_tokens");
         this.db = db;
-    }
-
-    public async findByEmail(email: string) {
-        try {
-            return await this.db("super_admin_refresh_tokens").where({ email: email }).first();
-        } catch (error) {
-
-            throw new Error(`RefreshTokenModel findByEmail error: ${error}`);
-        }
     }
 
     public async insertToken(uuid: string, token: string, userId: number, expires: string) {
         try {
-            const [insertedId] = await this.db("super_admin_refresh_tokens").insert({ uuid, token, user_id: userId, expires });
-            return await this.db("super_admin_refresh_tokens")
-                .where({ id: insertedId })
-                .select('uuid')
-                .first();
-
+            const [id] = await this.create({ uuid, token, user_id: userId, expires });
+            return this.findById(id);
         } catch (error) {
             throw new Error(`RefreshTokenModel insertToken error: ${error}`);
         }
@@ -32,7 +23,7 @@ class RefreshTokenModel {
 
     public async findByUUID(uuid: string) {
         try {
-            return await this.db("super_admin_refresh_tokens").where({ uuid }).first();
+            return await this.find({ uuid });
         } catch (error) {
             throw new Error(`RefreshTokenModel findByUUID error: ${error}`);
         }
@@ -41,9 +32,9 @@ class RefreshTokenModel {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public async updatebyUUID(uuid: string, data: any) {
         try {
-            return await this.db("super_admin_refresh_tokens").where({ uuid }).update(data);
+            return await this.update({ uuid }, data);
         } catch (error) {
-            throw new Error(`UserModel updatebyEmail error: ${error}`);
+            throw new Error(`RefreshTokenModel updatebyEmail error: ${error}`);
         }
     }
 }

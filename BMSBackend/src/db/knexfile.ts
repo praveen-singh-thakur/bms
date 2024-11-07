@@ -7,6 +7,9 @@ const config = {
     ...DbConfiguration,
     migrations: {
         directory: "./migrations",
+    },
+    seeds: {
+        directory: "./seeds",
     }
 }
 

@@ -1,7 +1,8 @@
 interface IRole {
-	id: number;
-	role_name: string;
-	description?: string;
+	id?: number;
+	uuid: string;
+	name: string;
+	description: string;
 }
 
 export { IRole };

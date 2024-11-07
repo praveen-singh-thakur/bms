@@ -1,9 +1,9 @@
 import * as Express from 'express'
-import { ProxyRouter } from '@services';
+import { ProxyRouter } from '@services/master';
 import { NextFunction, Request, Response } from 'express';
 import Helpers from '@utils/helpers.utils';
 import * as morgan from 'morgan';
-import { tenantMiddleware } from '@middlewares/tanent.middleware';
+import { tenantMiddleware } from '@middlewares/master';
 import * as  cookieParser from 'cookie-parser';
 
 export class ExpressConfiguration {

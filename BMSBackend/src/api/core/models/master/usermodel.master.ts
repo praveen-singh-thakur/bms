@@ -1,28 +1,31 @@
 
 import { IUser } from '@dbinterfaces';
 import { Knex } from 'knex';
-
-class UserModel {
+import { Model } from '@models/base.model';
+class UserModel extends Model<IUser> {
 
     private db: Knex;
 
     constructor(db: Knex) {
+        super(db, "staffs");
         this.db = db;
     }
 
     public async findByEmail(email: string) {
         try {
-            return await this.db("super_admin").where({ email: email }).first();
+            // return await this.db("super_admin").where({ email: email }).first(); 
+            return await this.findOne({ email });
         } catch (error) {
 
             throw new Error(`UserModel findByEmail error: ${error}`);
         }
     }
 
-    public async createUser(user: Partial<IUser>) {
+    public async createUser(user: IUser) {
         try {
-            const [insertedUserId] = await this.db('super_admin').insert(user);
-            return await this.db('super_admin')
+            // const [insertedUserId] = await this.db('super_admin').insert(user); 
+            const [insertedUserId] = await this.create(user)
+            return await this.query()
                 .where({ id: insertedUserId })
                 .select('id', 'uuid', 'first_name', 'last_name', 'email', 'profile_url')
                 .first();
@@ -35,7 +38,9 @@ class UserModel {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public async findByUUID(uuid: any) {
         try {
-            return await this.db('super_admin').where({ uuid }).first();
+            // return await this.db('super_admin').where({ uuid }).first(); 
+            return await this.findOne({ uuid });
+
         } catch (error) {
             throw new Error(`UserModel findByUUID error: ${error}`);
         }
@@ -44,7 +49,7 @@ class UserModel {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public async updatebyEmail(email: string, data: any) {
         try {
-            return await this.db('super_admin').where({ email }).update(data);
+            return await this.query().where({ email }).update(data);
         } catch (error) {
             throw new Error(`UserModel updatebyEmail error: ${error}`);
         }

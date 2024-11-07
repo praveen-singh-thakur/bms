@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { IRoute } from '@interfaces';
 
-import { UserAuthRoutes } from '@routes';
+import { StaffsRoutes, UserAuthRoutes } from '@routes/master';
 
 class ProxyRouter {
     private static instance: ProxyRouter;
@@ -9,7 +9,8 @@ class ProxyRouter {
 
 
     private readonly routes = [
-        { segment: "/auth", provider: UserAuthRoutes }
+        { segment: "/auth", provider: UserAuthRoutes },
+        { segment: "/user", provider: StaffsRoutes }
     ]
 
     private constructor() { }

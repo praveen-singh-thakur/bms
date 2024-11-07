@@ -26,7 +26,6 @@ const register: Joi.ObjectSchema<IUser> = Joi.object({ // Use 'Joi.object'
     email: Joi.string()
         .email({ tlds: { allow: false } })
         .pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
-        .required()
         .messages({
             'string.email': 'Email must be a valid email address.',
             'string.pattern.base': 'Email format is invalid.',

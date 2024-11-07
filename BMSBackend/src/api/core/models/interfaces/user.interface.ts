@@ -1,4 +1,5 @@
 interface IUser {
+	id?: number;
 	uuid: string;
 	first_name: string;
 	last_name: string;
@@ -8,6 +9,7 @@ interface IUser {
 	password: string;
 	profile_url: string;
 	status?: number;
+	role: number;
 }
 
 export { IUser };

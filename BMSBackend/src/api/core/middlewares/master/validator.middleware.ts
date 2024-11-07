@@ -5,7 +5,7 @@ import * as  Joi from 'joi';
 import Helpers from '@utils/helpers.utils';
 import * as jwt from 'jsonwebtoken';
 import client from "@config/redis.config";
-import RefreshTokenModel from './../models/refresh.model';
+import RefreshTokenModel from '../../models/refresh.model';
 
 interface AuthenticatedRequest extends Request {
     user?: { id: string; email: string; } | jwt.JwtPayload;
@@ -49,13 +49,14 @@ class Validator {
     async validateMiddleware(req: Request, res: Response, next: NextFunction) {
         try {
             // Validate request body asynchronously
-            const result: IUser = await Register.validateAsync(req.body, {
+            const result = await Register.validateAsync(req.body, {
                 presence: 'optional',
                 stripUnknown: true  // This removes any unknown keys not defined in the schema
             });
 
             // Pass validated result to the next middleware, if needed
             req.body = { ...req.body, ...result }; // Optionally replace the request body with the validated result
+
             next(); // Call next middleware on success 
 
         } catch (error) {
@@ -73,24 +74,20 @@ class Validator {
         }
     }
 
-
     async checkingUserAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const db = (req as any).knex;
-        const tokenId = await client.get("SuperAdminRefreshTokenId");
-        const data = await new RefreshTokenModel(db).findByUUID(tokenId);
-        const token = data.token;
-        if (!token) {
-            res.status(403).json(Helpers.responseHandler(403, "You have been Logged Out, SignIn First", undefined, 'Token is required'));
-            return;
-        }
-
         try {
+            const tokenId = await client.get("SuperAdminRefreshTokenId");
+            const [data] = await new RefreshTokenModel(db).findByUUID(tokenId);
+            const token = data.token;
+            if (!token) {
+                res.status(403).json(Helpers.responseHandler(403, "You have been Logged Out, SignIn First", undefined, 'Token is required'));
+                return;
+            }
             // Verify the token and decode the payload
             const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as IUser
-
             req.user = decoded;  // Store decoded user (with role) in request object
-            req.body.email = decoded.email;
             next();  // Continue to the next middleware/route handler
         } catch (error) {
             console.log(error);

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { IUser } from "@dbinterfaces";
-import { UserFactory } from "@factories/userfactory.factory";
+import { AuthFactory } from "@factories/master";
 import AuthHelpers from '@utils/authHelpers.utils';
 import { Request } from "express";
 class UserAuthService extends AuthHelpers {
@@ -19,8 +19,8 @@ class UserAuthService extends AuthHelpers {
     }
 
 
-    public async register(req: Request) {
-        const { uuid, first_name, last_name, email, country_code, phone, password, profile_url, status }: IUser = req.body;
+    public async register(req: Request | any) {
+        const { uuid, first_name, last_name, email, country_code, phone, password, profile_url, status, role }: IUser = req.body;
 
         const data: IUser = {
             uuid,
@@ -31,15 +31,20 @@ class UserAuthService extends AuthHelpers {
             phone,
             password,
             profile_url,
-            status
+            status,
+            role
         };
 
         const db = (req as any).knex;
         const isTenant = (req as any).isTenant;
-
+        const userrole = req.user.role;
         try {
-            const userFactory = new UserFactory(db);
-            return await userFactory.register(data, isTenant);
+            if (userrole === "superadmin") {
+                const authFactory = new AuthFactory(db);
+                return await authFactory.register(data, isTenant);
+            } else {
+                throw new Error("You are not authorized to perform this action");
+            }
 
         } catch (error) {
             throw new Error(error.message);
@@ -51,8 +56,8 @@ class UserAuthService extends AuthHelpers {
         const db = (req as any).knex;
         const isTenant = (req as any).isTenant;
         try {
-            const userFactory = new UserFactory(db);
-            return await userFactory.login({ email, password }, isTenant);
+            const authFactory = new AuthFactory(db);
+            return await authFactory.login({ email, password }, isTenant);
 
         } catch (error) {
             throw new Error(error.message);
@@ -66,34 +71,29 @@ class UserAuthService extends AuthHelpers {
         const isTenant = (req as any).isTenant;
         if (!refreshToken) {
             throw new Error("Refresh Token Not  Found");
-
         }
 
         try {
-            const userFactory = new UserFactory(db)
-            const decoded = this.verifyToken(refreshToken); // Verify the refresh token
-            const userId = decoded.id;
-            return await userFactory.refreshAccessToken(userId, isTenant, refreshToken);
+            const authFactory = new AuthFactory(db)
+            const decoded = this.verifyToken(refreshToken); // Verify the refresh token 
+            return await authFactory.refreshAccessToken(decoded, isTenant, refreshToken);
         } catch (error) {
             throw new Error("Invalid RefreshToken", error);
         }
-
     }
+
     public async changePassword(req: Request | any) {
         const { oldPassword, password } = req.body;
         const { email } = req.user;
         const db = (req as any).knex;
         const isTenant = (req as any).isTenant;
         try {
-            const userFactory = new UserFactory(db)
-            return await userFactory.changePassword(email, { oldPassword, password }, isTenant);
+            const authFactory = new AuthFactory(db)
+            return await authFactory.changePassword(email, { oldPassword, password }, isTenant);
         } catch (error) {
             throw new Error(error.message);
         }
-
     }
-
-
 }
 
 const userAuthService = UserAuthService.getInstance();

@@ -1,9 +1,10 @@
-import { IUser } from './user.interface';
 
 interface IRefreshToken {
+	id?: number,
+	uuid: string,
 	token: string;
-	user: IUser;
-	expires: Date;
+	user_id: number;
+	expires: string;
 }
 
 export {

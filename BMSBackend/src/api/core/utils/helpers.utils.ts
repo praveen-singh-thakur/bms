@@ -57,7 +57,9 @@ class Helpers {
         const date = new Date(expirationTimestamp * 1000);
         return format(date, 'yyyy-MM-dd HH:mm:ss');
     }
-
+    static getCurrentSQLTimestamp() {
+        return new Date().toISOString().slice(0, 19).replace("T", " ");
+    }
 }
 
 export default Helpers 
