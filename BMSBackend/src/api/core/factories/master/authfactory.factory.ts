@@ -148,7 +148,6 @@ export class AuthFactory extends AuthHelpers {
             const newaccessToken = this.generateToken(payload, accessTokenExpiry);
             const newrefreshToken = this.generateToken(payload, refreshTokenExpiry);
             const refreshTokenId = await client.get("SuperAdminRefreshTokenId");
-            // const savedRefreshToken = await tokenModel.insertToken(this.generateUUID(), refreshToken, decoded.id, Helpers.convertSecondsToDate(refreshTokenExpiry)); 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const savedRefreshTokenId: any = await tokenModel.updatebyUUID(refreshTokenId, { token: newrefreshToken, expires: Helpers.convertSecondsToDate(refreshTokenExpiry) });
             const savedRefreshToken = await tokenModel.findById(savedRefreshTokenId);

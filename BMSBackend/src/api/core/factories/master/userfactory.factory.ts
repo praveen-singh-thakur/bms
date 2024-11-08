@@ -4,7 +4,7 @@ import AuthHelpers from '@utils/authHelpers.utils';
 import { Knex } from 'knex';
 import RefreshTokenModel from '../../models/refresh.model';
 import { RoleModel } from '@models/master/rolemodel.master';
-
+import { IUser } from '@dbinterfaces';
 
 export class UserFactory extends AuthHelpers {
 
@@ -36,6 +36,22 @@ export class UserFactory extends AuthHelpers {
             const result = await model.findByUUID(uuid);
             return result;
 
+        } catch (err) {
+            throw new Error(err.message);
+        }
+    }
+
+    public async updateStaffs(data: IUser) {
+        try {
+            const roleModel = this.roleModel;
+            const model = this.userModel;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const [roleId] = await roleModel.find({ name: data.role } as any);
+            data = {
+                ...data, role: roleId.id
+            }
+            const result = await model.upsert(data);
+            return result;
         } catch (err) {
             throw new Error(err.message);
         }

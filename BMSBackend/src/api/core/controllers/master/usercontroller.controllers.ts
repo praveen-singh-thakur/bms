@@ -33,6 +33,15 @@ class UserController {
         }
     }
 
+    public async updateStaffs(req: Request, res: Response) {
+        try {
+            const result = await UserService.updateStaffs(req);
+            res.json(Helpers.responseHandler(200, "Staff Updated Successfully", result));
+        } catch (error) {
+            res.json(Helpers.responseHandler(500, undefined, undefined, error.message));
+        }
+    }
+
 }
 
 const userController = UserController.getInstance();

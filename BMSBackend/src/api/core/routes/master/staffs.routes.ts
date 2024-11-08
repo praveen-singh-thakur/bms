@@ -8,7 +8,8 @@ export class StaffsRoutes extends Router {
     }
 
     define(): void {
-        this.router.get("/get-all-staffs", Validator.checkingUserAuth, UserController.getAllStaffs);
+        this.router.get("/staffs", Validator.checkingUserAuth, UserController.getAllStaffs);
+        this.router.patch("/:userId", Validator.checkingUserAuth, UserController.updateStaffs);
         this.router.get("/:userId", Validator.checkingUserAuth, UserController.getOneStaffs);
     }
 }

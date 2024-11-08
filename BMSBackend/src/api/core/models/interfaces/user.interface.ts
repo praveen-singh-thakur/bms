@@ -6,7 +6,7 @@ interface IUser {
 	email: string;
 	country_code: string;
 	phone?: string;
-	password: string;
+	password?: string;
 	profile_url: string;
 	status?: number;
 	role: number;
