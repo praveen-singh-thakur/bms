@@ -19,14 +19,9 @@ class UserService extends AuthHelpers {
 
     public async getAllStaffs(req: Request | any) {
         const db = (req as any).knex;
-        const userdata = req.user;
         try {
-            if (userdata.role === "superadmin") {
-                const userFactory = new UserFactory(db)
-                return await userFactory.getAllStaffs();
-            } else {
-                throw new Error("You are not authorized to perform this action");
-            }
+            const userFactory = new UserFactory(db)
+            return await userFactory.getAllStaffs();
         } catch (error) {
             throw new Error(error.message);
         }
@@ -34,15 +29,10 @@ class UserService extends AuthHelpers {
 
     public async getOneStaffs(req: Request | any) {
         const db = (req as any).knex;
-        const userdata = req.user;
         const { userId } = req.params;
         try {
-            if (userdata.role === "superadmin") {
-                const userFactory = new UserFactory(db)
-                return await userFactory.getOneStaffs(userId);
-            } else {
-                throw new Error("You are not authorized to perform this action");
-            }
+            const userFactory = new UserFactory(db)
+            return await userFactory.getOneStaffs(userId);
         } catch (error) {
             throw new Error(error.message);
         }
@@ -50,17 +40,12 @@ class UserService extends AuthHelpers {
 
     public async updateStaffs(req: Request | any) {
         const db = (req as any).knex;
-        const userdata = req.user;
         const { userId } = req.params;
-        const { email, role, first_name, last_name, country_code, phone, profile_url } = req.body;
-        const data = { email, role, first_name, last_name, country_code, phone, profile_url, uuid: userId };
+        const { email, role, first_name, last_name, country_code, phone, profile_url, status } = req.body;
+        const data = { email, role, first_name, last_name, country_code, phone, profile_url, uuid: userId, status };
         try {
-            if (userdata.role === "superadmin") {
-                const userFactory = new UserFactory(db)
-                return await userFactory.updateStaffs(data);
-            } else {
-                throw new Error("You are not authorized to perform this action");
-            }
+            const userFactory = new UserFactory(db)
+            return await userFactory.updateStaffs(data);
         } catch (error) {
             throw new Error(error.message);
         }

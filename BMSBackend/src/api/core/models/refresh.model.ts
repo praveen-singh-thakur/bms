@@ -37,6 +37,14 @@ class RefreshTokenModel extends Model<IRefreshToken> {
             throw new Error(`RefreshTokenModel updatebyEmail error: ${error}`);
         }
     }
+
+    public async deleteByUserId(userId: number) {
+        try {
+            return await this.query().where({ user_id: userId }).del();
+        } catch (error) {
+            throw new Error(`RefreshTokenModel updatebyEmail error: ${error}`);
+        }
+    }
 }
 
 export default RefreshTokenModel;

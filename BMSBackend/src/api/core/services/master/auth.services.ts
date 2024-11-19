@@ -37,15 +37,9 @@ class UserAuthService extends AuthHelpers {
 
         const db = (req as any).knex;
         const isTenant = (req as any).isTenant;
-        const userrole = req.user.role;
         try {
-            if (userrole === "superadmin") {
-                const authFactory = new AuthFactory(db);
-                return await authFactory.register(data, isTenant);
-            } else {
-                throw new Error("You are not authorized to perform this action");
-            }
-
+            const authFactory = new AuthFactory(db);
+            return await authFactory.register(data, isTenant);
         } catch (error) {
             throw new Error(error.message);
         }

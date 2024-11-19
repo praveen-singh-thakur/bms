@@ -1,3 +1,3 @@
-import { Register } from "./auth.validations";
+import { Register, Login, ChangePassword, PostRole, PostPermission, UpdateRole, UpdatePermission, PostRolePermission, UpdateRolePermission, PostRoleName } from "./auth.validations";
 
-export { Register }
+export { Register, Login, ChangePassword, PostRole, PostPermission, UpdateRole, UpdatePermission, PostRolePermission, UpdateRolePermission, PostRoleName }

@@ -1,11 +1,13 @@
 import { IUser } from "@dbinterfaces";
 import { NextFunction, Request, Response } from "express";
-import { Register } from "@validations";
+import { Register, Login, ChangePassword, PostRole, PostPermission, UpdateRole, UpdatePermission, PostRolePermission, UpdateRolePermission, PostRoleName } from "@validations";
 import * as  Joi from 'joi';
 import Helpers from '@utils/helpers.utils';
 import * as jwt from 'jsonwebtoken';
 import client from "@config/redis.config";
 import RefreshTokenModel from '../../models/refresh.model';
+import { PermissionModel } from "@models/master/permission.master";
+import { RoleModel } from "@models/master/rolemodel.master";
 
 interface AuthenticatedRequest extends Request {
     user?: { id: string; email: string; } | jwt.JwtPayload;
@@ -46,32 +48,56 @@ class Validator {
         next();
     }
 
-    async validateMiddleware(req: Request, res: Response, next: NextFunction) {
-        try {
-            // Validate request body asynchronously
-            const result = await Register.validateAsync(req.body, {
-                presence: 'optional',
-                stripUnknown: true  // This removes any unknown keys not defined in the schema
-            });
+    validate(api: string) {
+        const schemaMap = {
+            login: Login,
+            register: Register,
+            postRole: PostRole,
+            updateRole: UpdateRole,
+            postRoleName: PostRoleName,
+            changePassword: ChangePassword,
+            postPermission: PostPermission,
+            updatePermission: UpdatePermission,
+            postRolePermission: PostRolePermission,
+            updateRolePermission: UpdateRolePermission
+        };
+        return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            const schema = schemaMap[api as keyof typeof schemaMap]; // Get schema based on API name
 
-            // Pass validated result to the next middleware, if needed
-            req.body = { ...req.body, ...result }; // Optionally replace the request body with the validated result
-
-            next(); // Call next middleware on success 
-
-        } catch (error) {
-            if (error instanceof Joi.ValidationError) {
-                // If validation error, send a response with the error details
-                res.status(400).json({
-                    message: 'Validation Error',
-                    details: error.details.map((err) => err.message), // List validation error messages
-                });
+            if (!schema) {
+                // If the API name does not have a corresponding schema, throw an error
+                res.status(400).json({ message: 'Invalid API for validation' });
                 return;
             }
 
-            // If other errors, pass to the next error handler
-            next(error);
-        }
+            try {
+                // Validate the request body using the corresponding schema
+                const validatedData = await schema.validateAsync(req.body, {
+                    presence: 'optional',
+                    stripUnknown: true, // Removes unknown fields not in the schema
+                    abortEarly: false, // Collects all errors instead of stopping at the first one
+                });
+
+                // Overwrite req.body with the validated data
+                req.body = validatedData;
+                next(); // Proceed to the next middleware
+
+            } catch (error) {
+                if (error instanceof Joi.ValidationError) {
+                    // Send a response with validation error details
+                    res.status(400).json({
+                        message: 'Validation Error',
+                        errors: error.details.map((err) => ({
+                            field: err.path.join('.'),
+                            message: err.message,
+                        })),
+                    });
+                    return;
+                }
+                // If any other error occurs, forward it to the next error handler
+                next(error);
+            }
+        };
     }
 
     async checkingUserAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -94,6 +120,36 @@ class Validator {
             res.status(401).json({ error: 'Invalid or expired token' });
             return;
         }
+    }
+    authorize(requiredPermissions: string[]) {
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return async (req: Request | any, res: Response, next: NextFunction) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const db = (req as any).knex;
+            try {
+                const user = req.user; // Assuming req.user is set after authentication
+                if (!user) {
+                    throw new Error("You are not authorized to perform this action");
+                }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const [roleId] = await new RoleModel(db).find({ name: user.role } as any);
+                // Fetch user's permissions based on their role
+                const userPermissions = await new PermissionModel(db).getPermissionsForRole(roleId.id);
+
+                // Check if the user has all required permissions
+                const hasPermissions = requiredPermissions.every((perm) => userPermissions.includes(perm));
+
+                if (!hasPermissions) {
+                    throw new Error("You are not authorized to perform this action");
+                }
+
+                // Proceed if authorized
+                next();
+            } catch (err) {
+                next(err);
+            }
+        };
     }
 }
 

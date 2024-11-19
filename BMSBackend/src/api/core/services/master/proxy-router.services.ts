@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { IRoute } from '@interfaces';
 
-import { StaffsRoutes, UserAuthRoutes } from '@routes/master';
+import { StaffsRoutes, UserAuthRoutes, RolesRoutes, PermissionRoutes, RolesPermissionRoutes } from '@routes/master';
 
 class ProxyRouter {
     private static instance: ProxyRouter;
@@ -10,7 +10,10 @@ class ProxyRouter {
 
     private readonly routes = [
         { segment: "/auth", provider: UserAuthRoutes },
-        { segment: "/user", provider: StaffsRoutes }
+        { segment: "/user", provider: StaffsRoutes },
+        { segment: "/roles", provider: RolesRoutes },
+        { segment: "/permissions", provider: PermissionRoutes },
+        { segment: "/role-permissions", provider: RolesPermissionRoutes }
     ]
 
     private constructor() { }

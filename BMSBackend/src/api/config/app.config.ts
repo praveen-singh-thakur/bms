@@ -5,6 +5,7 @@ import Helpers from '@utils/helpers.utils';
 import * as morgan from 'morgan';
 import { tenantMiddleware } from '@middlewares/master';
 import * as  cookieParser from 'cookie-parser';
+import * as  cors from "cors";
 
 export class ExpressConfiguration {
     private static instance: ExpressConfiguration;
@@ -26,10 +27,18 @@ export class ExpressConfiguration {
         return this;
     }
     plug(): ExpressConfiguration {
+
+        const corsOptions = {
+            origin: `http://${process.env.FRONTEND}`, // Allow requests from this origin
+            methods: 'GET,POST,PUT,DELETE',
+            credentials: true, // Allow credentials (cookies, authorization headers, etc.) 
+            allowedHeaders: ['Content-Type', 'Authorization'],
+        };
+        this.application.use(cors(corsOptions));
         this.application.use(cookieParser());
         this.application.use(morgan("dev"));
-        this.application.use(Express.urlencoded({ extended: false }));
         this.application.use(Express.json());
+        this.application.use(Express.urlencoded({ extended: true }));
         this.application.use(tenantMiddleware);
         this.application.use("/", ProxyRouter.map());
         // Not Found Middleware

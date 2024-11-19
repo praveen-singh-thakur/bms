@@ -1,5 +1,6 @@
 interface IRolePermission {
-	id: number;
+	id?: number;
+	uuid: string;
 	role_id: number;
 	permission_id: number;
 }

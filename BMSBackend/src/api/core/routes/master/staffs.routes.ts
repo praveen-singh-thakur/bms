@@ -8,8 +8,10 @@ export class StaffsRoutes extends Router {
     }
 
     define(): void {
-        this.router.get("/staffs", Validator.checkingUserAuth, UserController.getAllStaffs);
-        this.router.patch("/:userId", Validator.checkingUserAuth, UserController.updateStaffs);
-        this.router.get("/:userId", Validator.checkingUserAuth, UserController.getOneStaffs);
+        const { checkingUserAuth, authorize } = Validator;
+        this.router.use(checkingUserAuth, authorize(["manage_users"]));
+        this.router.get("/staffs", UserController.getAllStaffs);
+        this.router.patch("/:userId", UserController.updateStaffs);
+        this.router.get("/:userId", UserController.getOneStaffs);
     }
 }

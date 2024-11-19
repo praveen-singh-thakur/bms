@@ -34,6 +34,9 @@ export class UserFactory extends AuthHelpers {
         try {
             const model = this.userModel;
             const result = await model.findByUUID(uuid);
+            if (!result) {
+                throw new Error("Staff Not Found");
+            }
             return result;
 
         } catch (err) {
@@ -45,8 +48,22 @@ export class UserFactory extends AuthHelpers {
         try {
             const roleModel = this.roleModel;
             const model = this.userModel;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const tokenModel = this.refreshTokenModel;
+
+            const uuidExist = await model.findByUUID(data.uuid);
+
+            if (!uuidExist) {
+                throw new Error("Staff Not Found");
+            }
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any 
             const [roleId] = await roleModel.find({ name: data.role } as any);
+
+            if (data.status === -1) {
+                const userdata = await model.findByEmail(data.email);
+                await tokenModel.deleteByUserId(userdata.id);
+            }
+
             data = {
                 ...data, role: roleId.id
             }

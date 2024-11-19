@@ -37,7 +37,6 @@ export class AuthFactory extends AuthHelpers {
 
             const hashedPassword = await bcrypt.hash(userDetails.password, 10);
 
-            console.log(userDetails.role);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const [roleId] = await rolemodel.find({ name: userDetails.role } as any);
 
@@ -74,6 +73,7 @@ export class AuthFactory extends AuthHelpers {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async login(userDetails: { email: string; password: string }, isTenant: boolean) {
         try {
+
             const model = this.userModel;
             const tokenModel = this.refreshTokenModel;
             const roleModel = this.roleModel;
@@ -82,6 +82,10 @@ export class AuthFactory extends AuthHelpers {
 
             if (!existingUser) {
                 throw new Error("Incorrect username or password. Please try again.!");
+            }
+
+            if (existingUser.status === -1) {
+                throw new Error("You Are BlackListed. Please Contact with Admin.!");
             }
             // Compare provided password with stored password
             const passMatch = await this.comparePassword(userDetails.password, existingUser.password);

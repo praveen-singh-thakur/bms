@@ -16,18 +16,11 @@ export async function seed(knex: Knex): Promise<void> {
                 description: "Full access to all features and settings.",
                 created_at: trx.fn.now(),
                 updated_at: trx.fn.now(),
-            },
-            {
-                uuid: uuidv4(),
-                name: "admin",
-                description: "Partial access to all features and settings.",
-                created_at: trx.fn.now(),
-                updated_at: trx.fn.now(),
             }
         ]);
 
         // Fetch the inserted roles to get their ids
-        const [superAdminRole, adminRole] = await trx("roles").select("id", "name").whereIn("name", ["SuperAdmin", "Admin"]);
+        const [superAdminRole] = await trx("roles").select("id", "name").whereIn("name", ["SuperAdmin"]);
 
         // Step 2: Delete existing entries from 'permissions' and reset AUTO_INCREMENT
         await trx("permissions").del(); // Delete existing entries in 'permissions' table
@@ -73,20 +66,11 @@ export async function seed(knex: Knex): Promise<void> {
         // Add SuperAdmin permissions: all three permissions
         permissions.forEach(permission => {
             rolePermissionsData.push({
+                uuid: uuidv4(),
                 role_id: superAdminRole.id, // Accessing directly
                 permission_id: permission.id,
             });
         });
-
-        // Add Admin permissions: only manage_users and manage_roles
-        permissions
-            .filter(permission => permission.name !== "manage_permissions")
-            .forEach(permission => {
-                rolePermissionsData.push({
-                    role_id: adminRole.id, // Accessing directly
-                    permission_id: permission.id,
-                });
-            });
 
         // Insert into role_permissions table
         await trx("role_permissions").insert(rolePermissionsData);

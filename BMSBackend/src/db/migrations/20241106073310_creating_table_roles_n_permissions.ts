@@ -3,6 +3,7 @@ import type { Knex } from "knex";
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable('role_permissions', (table) => {
         table.increments('id').primary();
+        table.string('uuid', 64).unique().notNullable();
         table.integer('role_id').unsigned().references('id').inTable('roles').onDelete('CASCADE');
         table.integer('permission_id').unsigned().references('id').inTable('permissions').onDelete('CASCADE');
         table.timestamps(true, true);

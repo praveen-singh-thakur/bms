@@ -13,7 +13,6 @@ class UserModel extends Model<IUser> {
 
     public async findByEmail(email: string) {
         try {
-            // return await this.db("super_admin").where({ email: email }).first(); 
             return await this.findOne({ email });
         } catch (error) {
 
@@ -23,7 +22,7 @@ class UserModel extends Model<IUser> {
 
     public async createUser(user: IUser) {
         try {
-            // const [insertedUserId] = await this.db('super_admin').insert(user); 
+
             const [insertedUserId] = await this.create(user)
             return await this.query()
                 .where({ id: insertedUserId })
@@ -38,7 +37,6 @@ class UserModel extends Model<IUser> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public async findByUUID(uuid: any) {
         try {
-            // return await this.db('super_admin').where({ uuid }).first(); 
             return await this.findOne({ uuid });
 
         } catch (error) {
